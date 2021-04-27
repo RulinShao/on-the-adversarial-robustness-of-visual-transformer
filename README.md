@@ -4,6 +4,8 @@ Code for our paper "On the Adversarial Robustness of Visual Transformers"
 
 Paper link: <a href="https://arxiv.org/abs/2103.15670"> https://arxiv.org/abs/2103.15670 </a>
 
+<img src="images/robustness.png">
+
 ## White-box attack test
 
 To test adversarial robustness under white-box attack
