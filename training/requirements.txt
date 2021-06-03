@@ -1,0 +1,10 @@
+timm>=0.4.4
+numpy>=1.18.5
+torch>=1.2.0
+torchvision>=0.4.0
+clu==0.0.1-alpha.2
+flax==0.2.2
+ml_collections==0.1.0
+tensorflow-datasets==4.0.1
+tensorflow-probability==0.11.1
+git+https://github.com/fra31/auto-attack
