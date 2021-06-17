@@ -55,23 +55,10 @@ def main():
         model.load_state_dict(checkpoint['state_dict'])
 
     if args.method == 'natural':
-        if not args.eval:
-            ds_train = input_pipeline.get_data(
-                dataset=args.data, mode='train',
-                repeats=None, mixup_alpha=0, batch_size=args.batch_size, shuffle_buffer=50_000,
-                tfds_data_dir=args.tfds_dir, tfds_manual_dir=args.tfds_dir, resize_size=resize_size,
-                crop_size=crop_size,
-                inception_crop=(not args.no_inception_crop))
-            logger.info('VIT ds_train {}'.format(ds_train))
-        ds_test = input_pipeline.get_data(
-            dataset=args.data, mode='test',
-            repeats=1, batch_size=args.batch_size_eval, tfds_data_dir=args.tfds_dir, 
-            tfds_manual_dir=args.tfds_dir, crop_size=crop_size)
-        logger.info('VIT ds_test {}'.format(ds_test))        
         if args.eval:
             evaluate_natural(args, model, ds_test, verbose=True)
         else:
-            train_natural(args, model, ds_train, ds_test)
+            train_natural(args, model)
     elif args.method in ['fgsm', 'pgd', 'trades']:
         if args.eval_all:
             acc = []

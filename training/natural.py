@@ -1,5 +1,6 @@
 from utils import *
 from auto_LiRPA.utils import MultiAverageMeter
+import vit_jax.hyper as hyper
 
 def evaluate_natural(args, model, test_loader, verbose=False):
     model.eval()
@@ -27,7 +28,7 @@ def evaluate_natural(args, model, test_loader, verbose=False):
         logger.info('Evaluation {}'.format(meter))  
 
 
-def train_natural(args, model, ds_train, ds_test):
+def train_natural(args, model):
     if args.optimizer == 'sgd':
         opt = torch.optim.SGD(model.parameters(), lr=args.base_lr, momentum=0.9)
     elif args.optimizer == 'adam':
