@@ -1,4 +1,4 @@
-timm>=0.4.4
+timm==0.4.5
 numpy>=1.18.5
 torch>=1.2.0
 torchvision>=0.4.0
