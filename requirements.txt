@@ -1,0 +1,7 @@
+timm==0.4.5
+eagerpy==0.29.0
+foolbox==3.2.1
+torch_dct==0.1.5
+torch==1.9.1
+torchvision==0.10.1
+git+https://github.com/fra31/auto-attack

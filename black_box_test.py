@@ -1,12 +1,15 @@
 import torch
 import torch.nn as nn
 import argparse
+from foolbox import PyTorchModel, accuracy, samples
+from foolbox.attacks import LinfPGD, FGSM, L2CarliniWagnerAttack
+import eagerpy as ep
 
 from white_box_test import get_model, get_val_loader, get_acc, count_parameters
 
 
 parser = argparse.ArgumentParser(description='Transferability test')
-parser.add_argument('--data_dir', help='path to dataset')
+parser.add_argument('--data_dir', help='path to ImageNet dataset')
 parser.add_argument('--seed', default=310)
 parser.add_argument('--attack_batch_size', default=100)
 parser.add_argument('--attack_epochs', default=10)
@@ -21,14 +24,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def transfer_attack():
-
-    from foolbox import PyTorchModel, accuracy, samples
-    from foolbox.attacks import LinfPGD, FGSM, L2CarliniWagnerAttack
-
-    import eagerpy as ep
-
-
-    model_name = ['vit_small_patch16_224', 'vit_base_patch16_224', 'vit_large_patch16_224', 'T2t_vit_t_14', 'T2t_vit_t_24',
+    model_name = ['vit_small_patch16_224', 'vit_base_patch16_224', 'vit_large_patch16_224',
                   'resnext50_32x4d_ssl', 'resnet50_swsl', 'resnet50_32x4d', 'mobilenet', 'vgg16', 'resnet18', 'shufflenet']
     epsilon_list = [0.1, 0.08, 0.05, 0.02, 0.01, 0.005]
     for eps in epsilon_list:

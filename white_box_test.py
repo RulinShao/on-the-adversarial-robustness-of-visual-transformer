@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torchvision import transforms, datasets
 import torchvision
 import numpy as np
@@ -10,28 +9,26 @@ import argparse
 
 from foolbox import PyTorchModel, accuracy, samples
 from foolbox.attacks import LinfPGD, FGSM, L2CarliniWagnerAttack
+from autoattack import AutoAttack
 import eagerpy as ep
 from timm.models import load_checkpoint, create_model
-import t2t_vit  # necessary for registering t2t-vit model
-from senet.se_resnet import se_resnet50
 import torch_dct as dct
 
 import utils as aa
 
 
 parser = argparse.ArgumentParser(description='On the Adversarial Robustness of Visual Transformer')
+parser.add_argument('--data_dir', help='path to ImageNet dataset')
+parser.add_argument('--num-classes', type=int, default=1000, metavar='N',
+                    help='number of label classes (default: 1000)')
 parser.add_argument('--seed', default=310)
 parser.add_argument('--attack_batch_size', default=40)
 parser.add_argument('--attack_epochs', default=25)
 parser.add_argument('--attack_type', default='LinfPGD', help="attack type for foolbox attack")
 parser.add_argument('--iteration', default=40)
-parser.add_argument('--pretrained', type=bool, default=False, help="load default pre-trained model")
-parser.add_argument('--set_temperature', type=int, default=1)
 parser.add_argument('--model', default='vit_small_patch16_224', type=str)
 parser.add_argument('--mode', default='foolbox')
-parser.add_argument('--data_dir', help='path to dataset')
-parser.add_argument('--num-classes', type=int, default=1000, metavar='N',
-                    help='number of label classes (default: 1000)')
+
 args = parser.parse_args()
 
 
@@ -66,6 +63,7 @@ def count_parameters():
 
 
 def get_model(model_name=None):
+    # load pre-trained models
     if not model_name:
         model_name = args.model
     if model_name == 'resnet18':
@@ -98,30 +96,11 @@ def get_model(model_name=None):
         model = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnext50_32x4d_swsl')
     elif model_name == 'resnet50_swsl':
         model = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', 'resnet50_swsl')
-
-    elif 'seresnet50' in model_name:
-        model = se_resnet50(num_classes=1000)
-        model.load_state_dict(torch.load("../checkpoint/seresnet50-60a8950a85b2b.pkl"))
-    elif model_name == 'T2t_vit_t_14' or model_name == 'T2t_vit_t_24':
-        model = create_model(model_name,
-                             pretrained=False,
-                             num_classes=args.num_classes,
-                             in_chans=3, )
-        load_checkpoint(model, checkpoint_paths[model_name], True)
     else:
         model = create_model(model_name,
-                             pretrained=args.pretrained,
+                             pretrained=True,
                              num_classes=args.num_classes,
                              in_chans=3,)
-        if not args.pretrained:
-            if not args.set_temperature:
-                load_checkpoint(model, checkpoint_paths[model_name], True)
-            else:
-                load_checkpoint(model, checkpoint_paths[f"{model_name}_tem{args.set_temperature}"], True)
-                for i in range(len(model.blocks)):
-                    model.blocks[i].attn.scale = 768**(-1/args.set_temperature)
-                print("Set temperature to: ", model.blocks[0].attn.scale)
-
     return model.eval().to(device)
 
 
@@ -272,9 +251,6 @@ def foolbox_attack(filter=None, filter_preserve='low', free_parm='eps', plot_num
 
 
 def auto_attack():
-
-    from autoattack import AutoAttack
-
     # get model.
     model = get_model()
     model = nn.Sequential(aa.get_normalize_layer('imagenet'), model)
