@@ -4,8 +4,6 @@ import timm
 # import apex.amp as amp
 from parser import get_args
 
-from vit_jax import input_pipeline
-from vit_jax.input_pipeline import DATASET_PRESETS 
 from utils import *
 from train_adv import train_adv
 from pgd import evaluate_pgd

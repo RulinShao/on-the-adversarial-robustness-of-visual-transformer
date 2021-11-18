@@ -1,5 +1,4 @@
 from utils import *
-from vit_jax import input_pipeline
 
 
 def attack_pgd(model, X, y, epsilon, alpha, attack_iters, restarts, lower_limit, upper_limit, opt=None):
